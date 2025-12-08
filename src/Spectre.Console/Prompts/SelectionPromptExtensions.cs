@@ -25,7 +25,7 @@ public static class SelectionPromptExtensions
     }
 
     /// <summary>
-    /// Sets the selection mode.
+    /// Sets the search filter.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
     /// <param name="obj">The prompt.</param>
@@ -40,6 +40,24 @@ public static class SelectionPromptExtensions
         }
 
         obj.SearchFilter = searchFilter;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> UseEscapeToAbort<T>(this SelectionPrompt<T> obj)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.ShouldEscapeKeyAbort = true;
         return obj;
     }
 
