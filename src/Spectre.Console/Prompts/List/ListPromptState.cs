@@ -15,8 +15,15 @@ internal sealed class ListPromptState<T>
     public IReadOnlyList<ListPromptItem<T>> Items { get; }
     private readonly IReadOnlyList<int>? _leafIndexes;
 
+    private readonly Func<T, string, bool> _searchFilter;
+
     public ListPromptItem<T> Current => Items[Index];
     public string SearchText { get; private set; }
+
+    private bool DefaultSearchFilter(T x, string search)
+    {
+        return _converter.Invoke(x).Contains(search, StringComparison.OrdinalIgnoreCase);
+    }
 
     public ListPromptState(
         IReadOnlyList<ListPromptItem<T>> items,
@@ -24,9 +31,12 @@ internal sealed class ListPromptState<T>
         int pageSize, bool wrapAround,
         SelectionMode mode,
         bool skipUnselectableItems,
-        bool searchEnabled)
+        bool searchEnabled,
+        Func<T, string, bool>? searchFilter = null
+    )
     {
         _converter = converter ?? throw new ArgumentNullException(nameof(converter));
+        _searchFilter = searchFilter ?? DefaultSearchFilter;
         Items = items;
         PageSize = pageSize;
         WrapAround = wrapAround;
@@ -63,7 +73,6 @@ internal sealed class ListPromptState<T>
             switch (keyInfo.Key)
             {
                 case ConsoleKey.UpArrow:
-                case ConsoleKey.K:
                     if (currentLeafIndex > 0)
                     {
                         index = _leafIndexes[currentLeafIndex - 1];
@@ -76,7 +85,6 @@ internal sealed class ListPromptState<T>
                     break;
 
                 case ConsoleKey.DownArrow:
-                case ConsoleKey.J:
                     if (currentLeafIndex < _leafIndexes.Count - 1)
                     {
                         index = _leafIndexes[currentLeafIndex + 1];
@@ -119,8 +127,8 @@ internal sealed class ListPromptState<T>
         {
             index = keyInfo.Key switch
             {
-                ConsoleKey.UpArrow or ConsoleKey.K => Index - 1,
-                ConsoleKey.DownArrow or ConsoleKey.J => Index + 1,
+                ConsoleKey.UpArrow => Index - 1,
+                ConsoleKey.DownArrow => Index + 1,
                 ConsoleKey.Home => 0,
                 ConsoleKey.End => ItemCount - 1,
                 ConsoleKey.PageUp => Index - PageSize,
@@ -139,7 +147,7 @@ internal sealed class ListPromptState<T>
                 search = SearchText + keyInfo.KeyChar;
 
                 var item = Items.FirstOrDefault(x =>
-                    _converter.Invoke(x.Data).Contains(search, StringComparison.OrdinalIgnoreCase)
+                    _searchFilter(x.Data, search)
                     && (!x.IsGroup || Mode != SelectionMode.Leaf));
 
                 if (item != null)
@@ -152,11 +160,18 @@ internal sealed class ListPromptState<T>
             {
                 if (search.Length > 0)
                 {
-                    search = search.Substring(0, search.Length - 1);
+                    if (keyInfo.Modifiers != ConsoleModifiers.Control)
+                    {
+                        search = search.Substring(0, search.Length - 1);
+                    }
+                    else
+                    {
+                        search = "";
+                    }
                 }
 
                 var item = Items.FirstOrDefault(x =>
-                    _converter.Invoke(x.Data).Contains(search, StringComparison.OrdinalIgnoreCase) &&
+                    _searchFilter(x.Data, search) &&
                     (!x.IsGroup || Mode != SelectionMode.Leaf));
 
                 if (item != null)

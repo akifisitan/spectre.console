@@ -53,6 +53,12 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public Func<T, string>? Converter { get; set; }
 
     /// <summary>
+    /// Gets or sets the search filter. By default
+    /// the corresponding <see cref="TypeConverter"/> is used.
+    /// </summary>
+    public Func<T, string, bool>? SearchFilter { get; set; }
+
+    /// <summary>
     /// Gets or sets the text that will be displayed if there are more choices to show.
     /// </summary>
     public string? MoreChoicesText { get; set; }
@@ -100,7 +106,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Return the selected item
         return result.Items[result.Index].Data;
