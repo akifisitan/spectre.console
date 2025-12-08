@@ -75,6 +75,11 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public bool SearchEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not escape will throw operationCanceled exception.
+    /// </summary>
+    public bool ShouldEscapeKeyAbort { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="SelectionPrompt{T}"/> class.
     /// </summary>
     public SelectionPrompt()
@@ -115,6 +120,11 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
+        if (ShouldEscapeKeyAbort && key.Key == ConsoleKey.Escape)
+        {
+            return ListPromptInputResult.Abort;
+        }
+
         if (key.Key == ConsoleKey.Enter
          || key.Key == ConsoleKey.Packet
          || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar))
