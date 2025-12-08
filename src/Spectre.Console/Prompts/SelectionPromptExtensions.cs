@@ -25,6 +25,25 @@ public static class SelectionPromptExtensions
     }
 
     /// <summary>
+    /// Sets the selection mode.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="searchFilter">The search filter</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> UseSearchFilter<T>(this SelectionPrompt<T> obj, Func<T, string, bool> searchFilter)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchFilter = searchFilter;
+        return obj;
+    }
+
+    /// <summary>
     /// Adds multiple choices.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
