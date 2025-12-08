@@ -124,7 +124,7 @@ Task("Sign-Binaries")
 
 Task("Publish-NuGet")
     .WithCriteria(ctx => BuildSystem.IsRunningOnGitHubActions, "Not running on GitHub Actions")
-    .IsDependentOn("Sign-Binaries")
+    .IsDependentOn("Package")
     .Does(ctx =>
 {
     var apiKey = Argument<string?>("nuget-key", null);
