@@ -5,20 +5,23 @@ internal sealed class ListPromptState<T>
 {
     private readonly Func<T, string> _converter;
 
-    public int Index { get; private set; }
-    public int ItemCount => Items.Count;
+    public int Index => _selectableItems.Count == 0 ? 0 : _selectableItems[_selectableIndex].Index;
+
     public int PageSize { get; }
     public bool WrapAround { get; }
     public SelectionMode Mode { get; }
     public bool SkipUnselectableItems { get; private set; }
     public bool SearchEnabled { get; }
     public IReadOnlyList<ListPromptItem<T>> Items { get; }
-    private readonly IReadOnlyList<int>? _leafIndexes;
-
     private readonly Func<T, string, bool> _searchFilter;
 
-    public ListPromptItem<T> Current => Items[Index];
+    public ListPromptItem<T>? Current => _selectableItems.Count == 0 ? null : _selectableItems[_selectableIndex].Item;
     public string SearchText { get; private set; }
+    public List<ListPromptItem<T>> VisibleItems { get; private set; }
+
+    public bool FilterOnSearch { get; private set; }
+    private List<SelectableItem> _selectableItems;
+    private int _selectableIndex;
 
     private bool DefaultSearchFilter(T x, string search)
     {
@@ -32,8 +35,8 @@ internal sealed class ListPromptState<T>
         SelectionMode mode,
         bool skipUnselectableItems,
         bool searchEnabled,
-        Func<T, string, bool>? searchFilter = null
-    )
+        Func<T, string, bool>? searchFilter = null,
+        bool filterOnSearch = false)
     {
         _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         _searchFilter = searchFilter ?? DefaultSearchFilter;
@@ -44,154 +47,157 @@ internal sealed class ListPromptState<T>
         SkipUnselectableItems = skipUnselectableItems;
         SearchEnabled = searchEnabled;
         SearchText = string.Empty;
+        FilterOnSearch = filterOnSearch;
 
-        if (SkipUnselectableItems && mode == SelectionMode.Leaf)
-        {
-            _leafIndexes =
-                Items
-                    .Select((item, index) => new { item, index })
-                    .Where(x => !x.item.IsGroup)
-                    .Select(x => x.index)
-                    .ToList()
-                    .AsReadOnly();
-
-            Index = _leafIndexes.FirstOrDefault();
-        }
-        else
-        {
-            Index = 0;
-        }
+        VisibleItems = Items.ToList();
+        _selectableItems = GetSelectableItems();
+        _selectableIndex = 0;
     }
 
     public bool Update(ConsoleKeyInfo keyInfo)
     {
-        var index = Index;
-        if (SkipUnselectableItems && Mode == SelectionMode.Leaf)
-        {
-            Debug.Assert(_leafIndexes != null, nameof(_leafIndexes) + " != null");
-            var currentLeafIndex = _leafIndexes.IndexOf(index);
-            switch (keyInfo.Key)
-            {
-                case ConsoleKey.UpArrow:
-                    if (currentLeafIndex > 0)
-                    {
-                        index = _leafIndexes[currentLeafIndex - 1];
-                    }
-                    else if (WrapAround)
-                    {
-                        index = _leafIndexes.LastOrDefault();
-                    }
-
-                    break;
-
-                case ConsoleKey.DownArrow:
-                    if (currentLeafIndex < _leafIndexes.Count - 1)
-                    {
-                        index = _leafIndexes[currentLeafIndex + 1];
-                    }
-                    else if (WrapAround)
-                    {
-                        index = _leafIndexes.FirstOrDefault();
-                    }
-
-                    break;
-
-                case ConsoleKey.Home:
-                    index = _leafIndexes.FirstOrDefault();
-                    break;
-
-                case ConsoleKey.End:
-                    index = _leafIndexes.LastOrDefault();
-                    break;
-
-                case ConsoleKey.PageUp:
-                    index = Math.Max(currentLeafIndex - PageSize, 0);
-                    if (index < _leafIndexes.Count)
-                    {
-                        index = _leafIndexes[index];
-                    }
-
-                    break;
-
-                case ConsoleKey.PageDown:
-                    index = Math.Min(currentLeafIndex + PageSize, _leafIndexes.Count - 1);
-                    if (index < _leafIndexes.Count)
-                    {
-                        index = _leafIndexes[index];
-                    }
-
-                    break;
-            }
-        }
-        else
-        {
-            index = keyInfo.Key switch
-            {
-                ConsoleKey.UpArrow => Index - 1,
-                ConsoleKey.DownArrow => Index + 1,
-                ConsoleKey.Home => 0,
-                ConsoleKey.End => ItemCount - 1,
-                ConsoleKey.PageUp => Index - PageSize,
-                ConsoleKey.PageDown => Index + PageSize,
-                _ => Index,
-            };
-        }
-
-        var search = SearchText;
-
         if (SearchEnabled)
         {
-            // If is text input, append to search filter
             if (!char.IsControl(keyInfo.KeyChar))
             {
-                search = SearchText + keyInfo.KeyChar;
-
-                var item = Items.FirstOrDefault(x =>
-                    _searchFilter(x.Data, search)
-                    && (!x.IsGroup || Mode != SelectionMode.Leaf));
-
-                if (item != null)
+                SearchText += keyInfo.KeyChar;
+                if (FilterOnSearch)
                 {
-                    index = Items.IndexOf(item);
+                    VisibleItems = FilterItemsBySearch();
+                    _selectableItems = GetSelectableItems();
+                    _selectableIndex = 0;
                 }
+                else
+                {
+                    var item = _selectableItems
+                        .FirstOrDefault(x => MatchesSearch(x.Item));
+                    if (item != null)
+                    {
+                        _selectableIndex = _selectableItems.IndexOf(item);
+                    }
+                }
+
+                return true;
             }
 
             if (keyInfo.Key == ConsoleKey.Backspace)
             {
-                if (search.Length > 0)
+                if (SearchText.Length > 0)
                 {
-                    if (keyInfo.Modifiers != ConsoleModifiers.Control)
+                    SearchText = SearchText[..^1];
+                    if (FilterOnSearch)
                     {
-                        search = search.Substring(0, search.Length - 1);
+                        VisibleItems = FilterItemsBySearch();
+                        _selectableItems = GetSelectableItems();
+                        _selectableIndex = 0;
                     }
                     else
                     {
-                        search = "";
+                        var item = _selectableItems
+                            .FirstOrDefault(x => MatchesSearch(x.Item));
+                        if (item != null)
+                        {
+                            _selectableIndex = _selectableItems.IndexOf(item);
+                        }
                     }
-                }
 
-                var item = Items.FirstOrDefault(x =>
-                    _searchFilter(x.Data, search) &&
-                    (!x.IsGroup || Mode != SelectionMode.Leaf));
-
-                if (item != null)
-                {
-                    index = Items.IndexOf(item);
+                    return true;
                 }
             }
         }
 
-        index = WrapAround
-            ? (ItemCount + (index % ItemCount)) % ItemCount
-            : index.Clamp(0, ItemCount - 1);
-
-        if (index != Index || SearchText != search)
+        switch (keyInfo.Key)
         {
-            Index = index;
-            SearchText = search;
-            return true;
+            case ConsoleKey.UpArrow:
+                if (_selectableIndex > 0)
+                {
+                    _selectableIndex--;
+                }
+                else if (WrapAround)
+                {
+                    _selectableIndex = _selectableItems.Count - 1;
+                }
+
+                return true;
+
+            case ConsoleKey.DownArrow:
+                if (_selectableIndex < _selectableItems.Count - 1)
+                {
+                    _selectableIndex++;
+                }
+                else if (WrapAround)
+                {
+                    _selectableIndex = 0;
+                }
+
+                return true;
+
+            case ConsoleKey.Home:
+                _selectableIndex = 0;
+                return true;
+
+            case ConsoleKey.End:
+                _selectableIndex = _selectableItems.Count - 1;
+                return true;
+
+            case ConsoleKey.PageUp:
+                var pageUpIndex = Index - PageSize;
+                if (WrapAround)
+                {
+                    pageUpIndex = (pageUpIndex + VisibleItems.Count) % VisibleItems.Count;
+                }
+                else
+                {
+                    pageUpIndex = Math.Max(pageUpIndex, 0);
+                }
+
+                _selectableIndex = _selectableItems.IndexOf(_selectableItems.First(x => x.Index >= pageUpIndex));
+                return true;
+
+            case ConsoleKey.PageDown:
+                var pageDownIndex = Index + PageSize;
+                if (WrapAround)
+                {
+                    pageDownIndex %= VisibleItems.Count;
+                }
+                else
+                {
+                    pageDownIndex = Math.Min(pageDownIndex, VisibleItems.Count - 1);
+                }
+
+                _selectableIndex = _selectableItems.IndexOf(_selectableItems.First(x => x.Index >= pageDownIndex));
+                return true;
         }
 
         return false;
+    }
+
+    private List<SelectableItem> GetSelectableItems()
+    {
+        var selectableItems = VisibleItems
+            .Select((item, filteredIndex) => new SelectableItem(item, filteredIndex));
+
+        if (SkipUnselectableItems && Mode == SelectionMode.Leaf)
+        {
+            selectableItems = selectableItems.Where(x => !x.Item.IsGroup);
+        }
+
+        return selectableItems.ToList();
+    }
+
+    private List<ListPromptItem<T>> FilterItemsBySearch()
+    {
+        return Items
+            .Where(x => MatchesSearch(x) || x.Children.Any(MatchesSearch))
+            .ToList();
+    }
+
+    private bool MatchesSearch(ListPromptItem<T> item) =>
+        _converter.Invoke(item.Data).Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+
+    private class SelectableItem(ListPromptItem<T> item, int index)
+    {
+        public ListPromptItem<T> Item { get; } = item;
+        public int Index { get; } = index;
     }
 }
