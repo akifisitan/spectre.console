@@ -75,6 +75,11 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public bool SearchEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not items are filtered on search.
+    /// </summary>
+    public bool FilterOnSearch { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether or not escape will throw operationCanceled exception.
     /// </summary>
     public bool ShouldEscapeKeyAbort { get; set; }
@@ -111,24 +116,38 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = await prompt
+            .Show(
+                _tree,
+                converter,
+                Mode,
+                true,
+                SearchEnabled,
+                FilterOnSearch,
+                PageSize,
+                WrapAround,
+                cancellationToken
+            )
+            .ConfigureAwait(false);
 
         // Return the selected item
-        return result.Items[result.Index].Data;
+        return result.Current!.Data;
     }
 
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
-        if (ShouldEscapeKeyAbort && key.Key == ConsoleKey.Escape)
+        if (
+            key.Key == ConsoleKey.Enter
+            || key.Key == ConsoleKey.Packet
+            || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar)
+        )
         {
-            return ListPromptInputResult.Abort;
-        }
+            if (state.Current == null)
+            {
+                return ListPromptInputResult.None;
+            }
 
-        if (key.Key == ConsoleKey.Enter
-         || key.Key == ConsoleKey.Packet
-         || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar))
-        {
             // Selecting a non leaf in "leaf mode" is not allowed
             if (state.Current.IsGroup && Mode == SelectionMode.Leaf)
             {
