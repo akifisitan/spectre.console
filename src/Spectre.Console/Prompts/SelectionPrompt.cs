@@ -116,19 +116,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt
-            .Show(
-                _tree,
-                converter,
-                Mode,
-                true,
-                SearchEnabled,
-                FilterOnSearch,
-                PageSize,
-                WrapAround,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, FilterOnSearch, PageSize, WrapAround, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Return the selected item
         return result.Current!.Data;
@@ -137,11 +125,14 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
-        if (
-            key.Key == ConsoleKey.Enter
-            || key.Key == ConsoleKey.Packet
-            || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar)
-        )
+        if (ShouldEscapeKeyAbort && key.Key == ConsoleKey.Escape)
+        {
+            return ListPromptInputResult.Abort;
+        }
+
+        if (key.Key == ConsoleKey.Enter
+         || key.Key == ConsoleKey.Packet
+         || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar))
         {
             if (state.Current == null)
             {
@@ -197,7 +188,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
 
     /// <inheritdoc/>
     IRenderable IListPromptStrategy<T>.Render(IAnsiConsole console, bool scrollable, int cursorIndex,
-        IEnumerable<(int Index, ListPromptItem<T> Node)> items, bool skipUnselectableItems, string searchText)
+        IEnumerable<(int Index, ListPromptItem<T> Node)> items, string searchText)
     {
         var list = new List<IRenderable>();
         var disabledStyle = DisabledStyle ?? Color.Grey;
@@ -215,6 +206,14 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         if (Title != null)
         {
             grid.AddEmptyRow();
+        }
+
+        if (SearchEnabled)
+        {
+            var searchPrefix = SearchPlaceholderText ?? ListPromptConstants.SearchPlaceholderMarkup;
+
+            list.Add(new Markup(
+                searchText.Length > 0 ? searchPrefix + searchText.EscapeMarkup() : searchPrefix));
         }
 
         foreach (var item in items)
@@ -247,12 +246,6 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         {
             // Add padding
             list.Add(Text.Empty);
-        }
-
-        if (SearchEnabled)
-        {
-            list.Add(new Markup(
-                searchText.Length > 0 ? searchText.EscapeMarkup() : SearchPlaceholderText ?? ListPromptConstants.SearchPlaceholderMarkup));
         }
 
         if (scrollable)

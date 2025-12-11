@@ -84,7 +84,7 @@ internal sealed class ListPromptState<T>
             {
                 if (SearchText.Length > 0)
                 {
-                    SearchText = SearchText[..^1];
+                    SearchText = keyInfo.Modifiers != ConsoleModifiers.Control ? SearchText[..^1] : "";
                     if (FilterOnSearch)
                     {
                         VisibleItems = FilterItemsBySearch();
@@ -192,8 +192,7 @@ internal sealed class ListPromptState<T>
             .ToList();
     }
 
-    private bool MatchesSearch(ListPromptItem<T> item) =>
-        _converter.Invoke(item.Data).Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+    private bool MatchesSearch(ListPromptItem<T> item) => _searchFilter(item.Data, SearchText);
 
     private class SelectableItem(ListPromptItem<T> item, int index)
     {
