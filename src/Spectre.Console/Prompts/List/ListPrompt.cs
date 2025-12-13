@@ -21,7 +21,8 @@ internal sealed class ListPrompt<T>
         bool filterOnSearch,
         int requestedPageSize,
         bool wrapAround,
-        Func<T, string, bool>? searchFilter = null,
+        bool clearOnSubmit,
+        Func<T, string, bool>? searchFilter,
         CancellationToken cancellationToken = default
     )
     {
@@ -86,7 +87,11 @@ internal sealed class ListPrompt<T>
             }
         }
 
-        hook.Clear();
+        if (clearOnSubmit)
+        {
+            hook.Clear();
+        }
+
         _console.Cursor.Show();
 
         return state;

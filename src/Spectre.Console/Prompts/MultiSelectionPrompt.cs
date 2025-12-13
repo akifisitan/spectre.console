@@ -30,10 +30,21 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
     public Style? HighlightStyle { get; set; }
 
     /// <summary>
+    /// Gets or sets the text that will be displayed when no search text has been entered.
+    /// </summary>
+    public string? SearchPlaceholderText { get; set; }
+
+    /// <summary>
     /// Gets or sets the converter to get the display string for a choice. By default
     /// the corresponding <see cref="TypeConverter"/> is used.
     /// </summary>
     public Func<T, string>? Converter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the search filter. By default
+    /// the corresponding <see cref="TypeConverter"/> is used.
+    /// </summary>
+    public Func<T, string, bool>? SearchFilter { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether or not
@@ -56,6 +67,26 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
     /// Defaults to <see cref="SelectionMode.Leaf"/>.
     /// </summary>
     public SelectionMode Mode { get; set; } = SelectionMode.Leaf;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not search is enabled.
+    /// </summary>
+    public bool SearchEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not items are filtered on search.
+    /// </summary>
+    public bool FilterOnSearch { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    public bool AbortOnEscapePress { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not the output will be cleared after submit.
+    /// </summary>
+    public bool ClearOnSubmit { get; set; } = true;
 
     internal ListPromptTree<T> Tree { get; }
 
@@ -95,7 +126,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt.Show(Tree, converter, Mode, false, false, false, PageSize, WrapAround, searchFilter: null, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(Tree, converter, Mode, false, SearchEnabled, FilterOnSearch, PageSize, WrapAround, clearOnSubmit: ClearOnSubmit, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (Mode == SelectionMode.Leaf)
         {
@@ -149,6 +180,11 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
+        if (AbortOnEscapePress && key.Key == ConsoleKey.Escape)
+        {
+            return ListPromptInputResult.Abort;
+        }
+
         if (key.Key == ConsoleKey.Enter)
         {
             if (Required && state.Items.None(x => x.IsSelected))
@@ -163,8 +199,8 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
 
         if (key.Key == ConsoleKey.Spacebar || key.Key == ConsoleKey.Packet)
         {
-            var current = state.Current;
-            var select = !current!.IsSelected;
+            var current = state.Current!;
+            var select = !current.IsSelected;
 
             if (Mode == SelectionMode.Leaf)
             {

@@ -48,8 +48,9 @@ public static class SelectionPromptExtensions
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
     /// <param name="obj">The prompt.</param>
+    /// <param name="shouldAbortOnEscapePress">Whether <see cref="ConsoleKey.Escape"/> should abort.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
-    public static SelectionPrompt<T> UseEscapeToAbort<T>(this SelectionPrompt<T> obj)
+    public static SelectionPrompt<T> AbortOnEscapePress<T>(this SelectionPrompt<T> obj, bool shouldAbortOnEscapePress = true)
         where T : notnull
     {
         if (obj is null)
@@ -57,7 +58,26 @@ public static class SelectionPromptExtensions
             throw new ArgumentNullException(nameof(obj));
         }
 
-        obj.ShouldEscapeKeyAbort = true;
+        obj.AbortOnEscapePress = shouldAbortOnEscapePress;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether the output should be cleared on submit.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldClear">Whether the output should be cleared on submit.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> ClearOnSubmit<T>(this SelectionPrompt<T> obj, bool shouldClear = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.ClearOnSubmit = shouldClear;
         return obj;
     }
 

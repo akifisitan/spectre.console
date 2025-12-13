@@ -25,6 +25,63 @@ public static class MultiSelectionPromptExtensions
     }
 
     /// <summary>
+    /// Sets the search filter.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="searchFilter">The search filter</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> UseSearchFilter<T>(this MultiSelectionPrompt<T> obj, Func<T, string, bool> searchFilter)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchFilter = searchFilter;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldAbortOnEscapePress">Whether <see cref="ConsoleKey.Escape"/> should abort.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> AbortOnEscapePress<T>(this MultiSelectionPrompt<T> obj, bool shouldAbortOnEscapePress = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.AbortOnEscapePress = shouldAbortOnEscapePress;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether the output should be cleared on submit.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldClear">Whether the output should be cleared on submit.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> ClearOnSubmit<T>(this MultiSelectionPrompt<T> obj, bool shouldClear = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.ClearOnSubmit = shouldClear;
+        return obj;
+    }
+
+    /// <summary>
     /// Adds a choice.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
@@ -227,6 +284,63 @@ public static class MultiSelectionPromptExtensions
         }
 
         obj.WrapAround = shouldWrap;
+        return obj;
+    }
+
+    /// <summary>
+    /// Enables search for the prompt.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="filterOnSearch">A boolean which indicates whether items should be filtered on searching.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> EnableSearch<T>(this MultiSelectionPrompt<T> obj, bool filterOnSearch = false)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchEnabled = true;
+        obj.FilterOnSearch = filterOnSearch;
+        return obj;
+    }
+
+    /// <summary>
+    /// Disables search for the prompt.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> DisableSearch<T>(this MultiSelectionPrompt<T> obj)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchEnabled = false;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets the text that will be displayed when no search text has been entered.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="text">The text to display.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> SearchPlaceholderText<T>(this MultiSelectionPrompt<T> obj, string? text)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchPlaceholderText = text;
         return obj;
     }
 
