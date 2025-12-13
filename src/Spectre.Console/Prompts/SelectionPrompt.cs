@@ -82,7 +82,12 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <summary>
     /// Gets or sets a value indicating whether or not escape will throw operationCanceled exception.
     /// </summary>
-    public bool ShouldEscapeKeyAbort { get; set; }
+    public bool AbortOnEscapePress { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not the output will be cleared after submit.
+    /// </summary>
+    public bool ClearOnSubmit { get; set; } = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectionPrompt{T}"/> class.
@@ -116,7 +121,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, FilterOnSearch, PageSize, WrapAround, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, FilterOnSearch, PageSize, WrapAround, clearOnSubmit: ClearOnSubmit, searchFilter: SearchFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Return the selected item
         return result.Current!.Data;
@@ -125,7 +130,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
-        if (ShouldEscapeKeyAbort && key.Key == ConsoleKey.Escape)
+        if (AbortOnEscapePress && key.Key == ConsoleKey.Escape)
         {
             return ListPromptInputResult.Abort;
         }

@@ -35,8 +35,8 @@ internal sealed class ListPromptState<T>
         SelectionMode mode,
         bool skipUnselectableItems,
         bool searchEnabled,
-        Func<T, string, bool>? searchFilter = null,
-        bool filterOnSearch = false)
+        Func<T, string, bool>? searchFilter,
+        bool filterOnSearch)
     {
         _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         _searchFilter = searchFilter ?? DefaultSearchFilter;
