@@ -1,6 +1,16 @@
 # `Spectre.Console`
 
-_[![Spectre.Console NuGet Version](https://img.shields.io/nuget/v/spectre.console.svg?style=flat&label=NuGet%3A%20Spectre.Console)](https://www.nuget.org/packages/spectre.console)_ [![Netlify Status](https://api.netlify.com/api/v1/badges/1eaf215a-eb9c-45e4-8c64-c90b62963149/deploy-status)](https://app.netlify.com/sites/spectreconsole/deploys)
+_[![Spectre.Console NuGet Version](https://img.shields.io/nuget/v/spectre.console.svg?style=flat&label=NuGet%3A%20Spectre.Console)](https://www.nuget.org/packages/Vaerktojer.Spectre.Console)_
+
+Forked and added the following
+
+- Add search filter
+	- Allows fuzzy search, etc
+- Add ability to filter searched items
+- Move search prompt to the top
+- Made it so Ctrl + Backspace deletes the whole sentence
+- Add ability to abort on escape press
+- Add ability to stop clearing output after submit
 
 A .NET library that makes it easier to create beautiful, cross platform, console applications.  
 It is heavily inspired by the excellent Python library, [Rich](https://github.com/willmcgugan/rich). Detailed instructions for using `Spectre.Console` are located on the project website, https://spectreconsole.net

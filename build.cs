@@ -58,7 +58,7 @@ Task("Test")
 });
 
 Task("Package")
-    .IsDependentOn("Test")
+    .IsDependentOn("Build")
     .Does(ctx =>
 {
     ctx.DotNetPack(solution, new DotNetPackSettings
@@ -124,7 +124,7 @@ Task("Sign-Binaries")
 
 Task("Publish-NuGet")
     .WithCriteria(ctx => BuildSystem.IsRunningOnGitHubActions, "Not running on GitHub Actions")
-    .IsDependentOn("Sign-Binaries")
+    .IsDependentOn("Package")
     .Does(ctx =>
 {
     var apiKey = Argument<string?>("nuget-key", null);
@@ -138,7 +138,7 @@ Task("Publish-NuGet")
         ctx.Information("Publishing {0}...", file.GetFilename().FullPath);
         DotNetNuGetPush(file.FullPath, new DotNetNuGetPushSettings
         {
-            Source = "https://api.nuget.org/v3/index.json",
+            Source = Argument<string?>("is-nuget-test", null) == "true" ? "https://apiint.nugettest.org/v3/index.json" : "",
             ApiKey = apiKey,
         });
     }

@@ -1,13 +1,12 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Publish
+name: Publish to Test NuGet
 
 on:
   push:
     tags:
-      - '*'
-      - '!*-test'
+      - '*-test'
     branches:
-      - main
+      - vaerktojer
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -44,4 +43,5 @@ jobs:
         run: |
           dotnet tool restore
           dotnet make publish \
-            --nuget-key="${{secrets.NUGET_API_KEY}}"
+            --nuget-key="${{secrets.NUGET_TEST_API_KEY}}" \
+            --is-nuget-test="true"
