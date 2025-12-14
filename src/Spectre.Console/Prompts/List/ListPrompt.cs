@@ -20,7 +20,11 @@ internal sealed class ListPrompt<T>
         bool searchEnabled,
         int requestedPageSize,
         bool wrapAround,
-        CancellationToken cancellationToken = default)
+        bool clearOnSubmit,
+        Func<T, string, bool>? searchFilter,
+        bool filterOnSearch,
+        CancellationToken cancellationToken = default
+    )
     {
         if (tree is null)
         {
@@ -47,7 +51,7 @@ internal sealed class ListPrompt<T>
             throw new InvalidOperationException("Cannot show an empty selection prompt. Please call the AddChoice() method to configure the prompt.");
         }
 
-        var state = new ListPromptState<T>(nodes, converter, _strategy.CalculatePageSize(_console, nodes.Count, requestedPageSize), wrapAround, selectionMode, skipUnselectableItems, searchEnabled);
+        var state = new ListPromptState<T>(nodes, converter, _strategy.CalculatePageSize(_console, nodes.Count, requestedPageSize), wrapAround, selectionMode, skipUnselectableItems, searchEnabled, searchFilter: searchFilter, filterOnSearch: filterOnSearch);
         var hook = new ListPromptRenderHook<T>(_console, () => BuildRenderable(state));
 
         using (new RenderHookScope(_console, hook))
@@ -71,6 +75,11 @@ internal sealed class ListPrompt<T>
                     break;
                 }
 
+                if (result == ListPromptInputResult.Abort)
+                {
+                    throw new OperationCanceledException("Operation aborted");
+                }
+
                 if (state.Update(key) || result == ListPromptInputResult.Refresh)
                 {
                     hook.Refresh();
@@ -78,7 +87,11 @@ internal sealed class ListPrompt<T>
             }
         }
 
-        hook.Clear();
+        if (clearOnSubmit)
+        {
+            hook.Clear();
+        }
+
         _console.Cursor.Show();
 
         return state;
@@ -90,14 +103,14 @@ internal sealed class ListPrompt<T>
         var middleOfList = pageSize / 2;
 
         var skip = 0;
-        var take = state.ItemCount;
+        var take = state.VisibleItems.Count;
         var cursorIndex = state.Index;
 
-        var scrollable = state.ItemCount > pageSize;
+        var scrollable = state.VisibleItems.Count > pageSize;
         if (scrollable)
         {
             skip = Math.Max(0, state.Index - middleOfList);
-            take = Math.Min(pageSize, state.ItemCount - skip);
+            take = Math.Min(pageSize, state.VisibleItems.Count - skip);
 
             if (take < pageSize)
             {
@@ -118,9 +131,8 @@ internal sealed class ListPrompt<T>
         return _strategy.Render(
             _console,
             scrollable, cursorIndex,
-            state.Items.Skip(skip).Take(take)
+            state.VisibleItems.Skip(skip).Take(take)
                 .Select((node, index) => (index, node)),
-            state.SkipUnselectableItems,
             state.SearchText);
     }
 }

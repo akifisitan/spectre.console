@@ -25,6 +25,63 @@ public static class SelectionPromptExtensions
     }
 
     /// <summary>
+    /// Sets the search filter.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="searchFilter">The search filter</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> UseSearchFilter<T>(this SelectionPrompt<T> obj, Func<T, string, bool> searchFilter)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchFilter = searchFilter;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldAbortOnEscapePress">Whether <see cref="ConsoleKey.Escape"/> should abort.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> AbortOnEscapePress<T>(this SelectionPrompt<T> obj, bool shouldAbortOnEscapePress = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.AbortOnEscapePress = shouldAbortOnEscapePress;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets whether the output should be cleared on submit.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldClear">Whether the output should be cleared on submit.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> ClearOnSubmit<T>(this SelectionPrompt<T> obj, bool shouldClear = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.ClearOnSubmit = shouldClear;
+        return obj;
+    }
+
+    /// <summary>
     /// Adds multiple choices.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
@@ -187,8 +244,9 @@ public static class SelectionPromptExtensions
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
     /// <param name="obj">The prompt.</param>
+    /// <param name="filterOnSearch">A boolean which indicates whether items should be filtered on searching.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
-    public static SelectionPrompt<T> EnableSearch<T>(this SelectionPrompt<T> obj)
+    public static SelectionPrompt<T> EnableSearch<T>(this SelectionPrompt<T> obj, bool filterOnSearch = false)
         where T : notnull
     {
         if (obj is null)
@@ -197,6 +255,7 @@ public static class SelectionPromptExtensions
         }
 
         obj.SearchEnabled = true;
+        obj.FilterOnSearch = filterOnSearch;
         return obj;
     }
 
@@ -253,6 +312,25 @@ public static class SelectionPromptExtensions
         }
 
         obj.HighlightStyle = highlightStyle;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets the style of highlighted search matches.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="searchHighlightStyle">The highlight style of the selected choice.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> SearchHighlightStyle<T>(this SelectionPrompt<T> obj, Style searchHighlightStyle)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.SearchHighlightStyle = searchHighlightStyle;
         return obj;
     }
 

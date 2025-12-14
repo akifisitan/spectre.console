@@ -53,6 +53,12 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public Func<T, string>? Converter { get; set; }
 
     /// <summary>
+    /// Gets or sets the search filter. By default
+    /// the corresponding <see cref="TypeConverter"/> is used.
+    /// </summary>
+    public Func<T, string, bool>? SearchFilter { get; set; }
+
+    /// <summary>
     /// Gets or sets the text that will be displayed if there are more choices to show.
     /// </summary>
     public string? MoreChoicesText { get; set; }
@@ -67,6 +73,21 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// Gets or sets a value indicating whether or not search is enabled.
     /// </summary>
     public bool SearchEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not items are filtered on search.
+    /// </summary>
+    public bool FilterOnSearch { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not escape will throw operationCanceled exception.
+    /// </summary>
+    public bool AbortOnEscapePress { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether or not the output will be cleared after submit.
+    /// </summary>
+    public bool ClearOnSubmit { get; set; } = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectionPrompt{T}"/> class.
@@ -100,19 +121,29 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, clearOnSubmit: ClearOnSubmit, searchFilter: SearchFilter, filterOnSearch: FilterOnSearch, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Return the selected item
-        return result.Items[result.Index].Data;
+        return result.Current!.Data;
     }
 
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
+        if (AbortOnEscapePress && key.Key == ConsoleKey.Escape)
+        {
+            return ListPromptInputResult.Abort;
+        }
+
         if (key.Key == ConsoleKey.Enter
          || key.Key == ConsoleKey.Packet
          || (!state.SearchEnabled && key.Key == ConsoleKey.Spacebar))
         {
+            if (state.Current == null)
+            {
+                return ListPromptInputResult.None;
+            }
+
             // Selecting a non leaf in "leaf mode" is not allowed
             if (state.Current.IsGroup && Mode == SelectionMode.Leaf)
             {
@@ -162,7 +193,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
 
     /// <inheritdoc/>
     IRenderable IListPromptStrategy<T>.Render(IAnsiConsole console, bool scrollable, int cursorIndex,
-        IEnumerable<(int Index, ListPromptItem<T> Node)> items, bool skipUnselectableItems, string searchText)
+        IEnumerable<(int Index, ListPromptItem<T> Node)> items, string searchText)
     {
         var list = new List<IRenderable>();
         var disabledStyle = DisabledStyle ?? Color.Grey;
@@ -180,6 +211,14 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         if (Title != null)
         {
             grid.AddEmptyRow();
+        }
+
+        if (SearchEnabled)
+        {
+            var searchPrefix = SearchPlaceholderText ?? ListPromptConstants.SearchPlaceholderMarkup;
+
+            list.Add(new Markup(
+                searchText.Length > 0 ? searchPrefix + searchText.EscapeMarkup() : searchPrefix));
         }
 
         foreach (var item in items)
@@ -212,12 +251,6 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         {
             // Add padding
             list.Add(Text.Empty);
-        }
-
-        if (SearchEnabled)
-        {
-            list.Add(new Markup(
-                searchText.Length > 0 ? searchText.EscapeMarkup() : SearchPlaceholderText ?? ListPromptConstants.SearchPlaceholderMarkup));
         }
 
         if (scrollable)
