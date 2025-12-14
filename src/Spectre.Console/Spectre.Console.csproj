@@ -5,6 +5,7 @@
     <IsPackable>true</IsPackable>
     <DefineConstants>$(DefineConstants)TRACE;WCWIDTH_VISIBILITY_INTERNAL</DefineConstants>
     <IsAotCompatible Condition="'$(TargetFramework)' != 'netstandard2.0'" >true</IsAotCompatible>
+    <PackageId>Vaerktojer.Spectre.Console</PackageId>
   </PropertyGroup>
 
   <ItemGroup Label="REMOVE THIS">
