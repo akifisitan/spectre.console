@@ -1,6 +1,6 @@
 # `Spectre.Console`
 
-_[![Spectre.Console NuGet Version](https://img.shields.io/nuget/v/spectre.console.svg?style=flat&label=NuGet%3A%20Spectre.Console)](https://www.nuget.org/packages/spectre.console)_
+_[![Spectre.Console NuGet Version](https://img.shields.io/nuget/v/spectre.console.svg?style=flat&label=NuGet%3A%20Spectre.Console)](https://www.nuget.org/packages/Vaerktojer.Spectre.Console)_
 
 A .NET library that makes it easier to create beautiful, cross platform, console applications.  
 It is heavily inspired by the excellent Python library, [Rich](https://github.com/willmcgugan/rich). Detailed instructions for using `Spectre.Console` are located on the project website, https://spectreconsole.net

@@ -5,6 +5,7 @@
     <IsTestProject>false</IsTestProject>
     <IsPackable>true</IsPackable>
     <Description>Contains testing utilities for Spectre.Console.</Description>
+    <PackageId>Vaerktojer.Spectre.Console.Testing</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

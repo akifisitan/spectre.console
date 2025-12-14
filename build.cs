@@ -57,7 +57,7 @@ Task("Test")
 });
 
 Task("Package")
-    .IsDependentOn("Test")
+    .IsDependentOn("Build")
     .Does(ctx =>
 {
     ctx.DotNetPack(solution, new DotNetPackSettings
@@ -89,7 +89,7 @@ Task("Publish-NuGet")
         ctx.Information("Publishing {0}...", file.GetFilename().FullPath);
         DotNetNuGetPush(file.FullPath, new DotNetNuGetPushSettings
         {
-            Source = "https://api.nuget.org/v3/index.json",
+            Source = Argument<string?>("is-nuget-test", null) == "true" ? "https://apiint.nugettest.org/v3/index.json" : "",
             ApiKey = apiKey,
         });
     }

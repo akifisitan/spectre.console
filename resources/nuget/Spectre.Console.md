@@ -1,4 +1,4 @@
-# `Spectre.Console`
+# `Vaerktojer.Spectre.Console`
 
 A .NET library that makes it easier to create beautiful, cross platform, console applications. It is heavily inspired by the excellent Python library, [Rich](https://github.com/willmcgugan/rich).
 
