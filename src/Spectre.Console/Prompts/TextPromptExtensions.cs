@@ -360,4 +360,23 @@ public static class TextPromptExtensions
         obj.ChoicesStyle = style;
         return obj;
     }
+
+    /// <summary>
+    /// Sets whether <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="shouldAbortOnEscapePress">Whether <see cref="ConsoleKey.Escape"/> should abort.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> AbortOnEscapePress<T>(this TextPrompt<T> obj, bool shouldAbortOnEscapePress = true)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.AbortOnEscapePress = shouldAbortOnEscapePress;
+        return obj;
+    }
 }

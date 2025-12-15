@@ -5,7 +5,7 @@ namespace Spectre.Console;
 /// </summary>
 public static partial class AnsiConsoleExtensions
 {
-    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, CancellationToken cancellationToken = default)
+    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, bool abortOnEscapePress = false, CancellationToken cancellationToken = default)
     {
         if (console is null)
         {
@@ -27,6 +27,12 @@ public static partial class AnsiConsoleExtensions
             }
 
             var key = rawKey.Value;
+
+            if (abortOnEscapePress && key.Key == ConsoleKey.Escape)
+            {
+                throw new OperationCanceledException();
+            }
+
             if (key.Key == ConsoleKey.Enter)
             {
                 return text;
@@ -52,18 +58,23 @@ public static partial class AnsiConsoleExtensions
             {
                 if (text.Length > 0)
                 {
-                    var lastChar = text.Last();
-                    text = text.Substring(0, text.Length - 1);
+                    var numCharsToDelete = key.Modifiers != ConsoleModifiers.Control ? 1 : text.Length;
 
-                    if (mask != null)
+                    for (var i = 0; i < numCharsToDelete; i++)
                     {
-                        if (UnicodeCalculator.GetWidth(lastChar) == 1)
+                        var lastChar = text.Last();
+                        text = text.Substring(0, text.Length - 1);
+
+                        if (mask != null)
                         {
-                            console.Write("\b \b");
-                        }
-                        else if (UnicodeCalculator.GetWidth(lastChar) == 2)
-                        {
-                            console.Write("\b \b\b \b");
+                            if (UnicodeCalculator.GetWidth(lastChar) == 1)
+                            {
+                                console.Write("\b \b");
+                            }
+                            else if (UnicodeCalculator.GetWidth(lastChar) == 2)
+                            {
+                                console.Write("\b \b\b \b");
+                            }
                         }
                     }
                 }
