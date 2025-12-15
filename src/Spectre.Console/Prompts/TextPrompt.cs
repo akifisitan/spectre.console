@@ -85,6 +85,11 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     public Style? ChoicesStyle { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
+    /// </summary>
+    public bool AbortOnEscapePress { get; set; }
+
+    /// <summary>
     /// Gets or sets the default value.
     /// </summary>
     internal DefaultPromptValue<T>? DefaultValue { get; set; }
@@ -130,7 +135,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
 
             while (true)
             {
-                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, cancellationToken).ConfigureAwait(false);
+                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, AbortOnEscapePress, cancellationToken).ConfigureAwait(false);
 
                 // Nothing entered?
                 if (string.IsNullOrWhiteSpace(input))
@@ -141,11 +146,6 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                         console.Write(IsSecret ? defaultValue.Mask(Mask) : defaultValue, promptStyle);
                         console.WriteLine();
                         return DefaultValue.Value;
-                    }
-
-                    if (!AllowEmpty)
-                    {
-                        continue;
                     }
                 }
 
