@@ -77,7 +77,8 @@ internal sealed class ListPrompt<T>
 
                 var key = rawKey.Value;
                 var result = _strategy.HandleInput(key, state);
-                if (result == ListPromptInputResult.Submit)
+
+                if (state.InvokedCustomHotkeyRegistrationKey is not null)
                 {
                     break;
                 }
@@ -87,9 +88,9 @@ internal sealed class ListPrompt<T>
                     break;
                 }
 
-                if (result == ListPromptInputResult.Abort)
+                if (result == ListPromptInputResult.Submit)
                 {
-                    throw new OperationCanceledException("Operation aborted");
+                    break;
                 }
 
                 if (state.Update(key) || result == ListPromptInputResult.Refresh)
@@ -105,6 +106,11 @@ internal sealed class ListPrompt<T>
         }
 
         _console.Cursor.Show();
+
+        if (state.InvokedCustomHotkeyRegistrationKey is not null)
+        {
+            throw new CustomHotkeyInvocationException(state.InvokedCustomHotkeyRegistrationKey);
+        }
 
         return state;
     }

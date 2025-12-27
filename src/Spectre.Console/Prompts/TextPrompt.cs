@@ -99,7 +99,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     /// <summary>
     /// Gets or sets a value indicating whether or not <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
     /// </summary>
-    public bool AbortOnEscapePress { get; set; }
+    public Dictionary<string, Func<ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
 
     /// <summary>
     /// Gets or sets the default value.
@@ -141,7 +141,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
             var choices = Choices.Select(choice => converter(choice)).ToList();
             var choiceMap = Choices.ToDictionary(choice => converter(choice), choice => choice, _comparer);
             var inputhandler = InputHandler ?? ((inputConsole, style, secret, mask, items, initialInput, token) =>
-                inputConsole.ReadLine(style, secret, mask, items, initialInput, token, AbortOnEscapePress));
+                inputConsole.ReadLine(style, secret, mask, items, initialInput, token, CustomHotKeyRegistrations));
 
             WritePrompt(console);
 
