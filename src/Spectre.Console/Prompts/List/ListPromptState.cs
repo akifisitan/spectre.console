@@ -19,6 +19,7 @@ internal sealed class ListPromptState<T>
     public bool FilterOnSearch { get; private set; }
     private List<SelectableItem> _selectableItems;
     private int _selectableIndex;
+    public string? InvokedCustomHotkeyRegistrationKey { get; set; }
 
     public ListPromptState(
         IReadOnlyList<ListPromptItem<T>> items,
@@ -51,6 +52,11 @@ internal sealed class ListPromptState<T>
         {
             if (!char.IsControl(keyInfo.KeyChar))
             {
+                if (keyInfo.Key == ConsoleKey.Spacebar && keyInfo.Modifiers == ConsoleModifiers.Control)
+                {
+                    return false;
+                }
+
                 SearchText += keyInfo.KeyChar;
                 if (FilterOnSearch)
                 {

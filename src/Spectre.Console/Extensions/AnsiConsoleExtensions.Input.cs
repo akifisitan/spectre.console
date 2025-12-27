@@ -5,7 +5,7 @@ namespace Spectre.Console;
 /// </summary>
 public static partial class AnsiConsoleExtensions
 {
-    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, bool abortOnEscapePress = false, CancellationToken cancellationToken = default)
+    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, Dictionary<string, Func<ConsoleKeyInfo, bool>>? customHotkeyRegistrations = null, CancellationToken cancellationToken = default)
     {
         if (console is null)
         {
@@ -28,9 +28,15 @@ public static partial class AnsiConsoleExtensions
 
             var key = rawKey.Value;
 
-            if (abortOnEscapePress && key.Key == ConsoleKey.Escape)
+            if (customHotkeyRegistrations is not null)
             {
-                throw new OperationCanceledException();
+                foreach (var (registrationKey, func) in customHotkeyRegistrations)
+                {
+                    if (func(key))
+                    {
+                        throw new CustomHotkeyInvocationException(registrationKey);
+                    }
+                }
             }
 
             if (key.Key == ConsoleKey.Enter)

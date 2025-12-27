@@ -79,14 +79,14 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
     public bool FilterOnSearch { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether or not <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
-    /// </summary>
-    public bool AbortOnEscapePress { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether or not the output will be cleared after submit.
     /// </summary>
     public bool ClearOnSubmit { get; set; } = true;
+
+    /// <summary>
+    /// Custom hotkey support
+    /// </summary>
+    public Dictionary<string, Func<ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
 
     internal ListPromptTree<T> Tree { get; }
 
@@ -180,9 +180,16 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
-        if (AbortOnEscapePress && key.Key == ConsoleKey.Escape)
+        if (CustomHotKeyRegistrations is not null)
         {
-            return ListPromptInputResult.Abort;
+            foreach (var (registrationKey, func) in CustomHotKeyRegistrations)
+            {
+                if (func(key))
+                {
+                    state.InvokedCustomHotkeyRegistrationKey = registrationKey;
+                    return ListPromptInputResult.CustomHotkeyPressed;
+                }
+            }
         }
 
         if (key.Key == ConsoleKey.Enter)
@@ -197,9 +204,14 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             return ListPromptInputResult.Submit;
         }
 
-        if (key.Key == ConsoleKey.Spacebar || key.Key == ConsoleKey.Packet)
+        if ((!SearchEnabled && key.Key == ConsoleKey.Spacebar) || (SearchEnabled && key.Key == ConsoleKey.Spacebar && key.Modifiers == ConsoleModifiers.Control) || key.Key == ConsoleKey.Packet)
         {
-            var current = state.Current!;
+            var current = state.Current;
+            if (current == null)
+            {
+                return ListPromptInputResult.None;
+            }
+
             var select = !current.IsSelected;
 
             if (Mode == SelectionMode.Leaf)
@@ -249,6 +261,11 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             extra++;
         }
 
+        if (SearchEnabled)
+        {
+            extra += 1;
+        }
+
         var pageSize = requestedPageSize;
         if (pageSize > console.Profile.Height - extra)
         {
@@ -278,7 +295,17 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             grid.AddEmptyRow();
         }
 
-        foreach (var item in items)
+        if (SearchEnabled)
+        {
+            var searchPrefix = SearchPlaceholderText ?? ListPromptConstants.SearchPlaceholderMarkup;
+
+            list.Add(new Markup(
+                searchText.Length > 0 ? searchPrefix + searchText.EscapeMarkup() : searchPrefix));
+        }
+
+        var materializedItems = items.ToList();
+
+        foreach (var item in materializedItems)
         {
             var current = item.Index == cursorIndex;
             var style = current ? highlightStyle : Style.Plain;
@@ -309,7 +336,14 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         }
 
         // Instructions
-        list.Add(new Markup(InstructionsText ?? ListPromptConstants.InstructionsMarkup));
+        if (materializedItems.Count == 0)
+        {
+            list.Add(new Markup(ListPromptConstants.FilterNotFound));
+        }
+        else
+        {
+            list.Add(new Markup(InstructionsText ?? (SearchEnabled ? ListPromptConstants.InstructionsWithSearchMarkup : ListPromptConstants.InstructionsMarkup)));
+        }
 
         // Combine all items
         return new Rows(list);

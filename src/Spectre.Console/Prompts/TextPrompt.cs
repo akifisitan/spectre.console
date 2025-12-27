@@ -87,7 +87,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     /// <summary>
     /// Gets or sets a value indicating whether or not <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
     /// </summary>
-    public bool AbortOnEscapePress { get; set; }
+    public Dictionary<string, Func<ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
 
     /// <summary>
     /// Gets or sets the default value.
@@ -135,7 +135,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
 
             while (true)
             {
-                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, AbortOnEscapePress, cancellationToken).ConfigureAwait(false);
+                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, CustomHotKeyRegistrations, cancellationToken).ConfigureAwait(false);
 
                 // Nothing entered?
                 if (string.IsNullOrWhiteSpace(input))

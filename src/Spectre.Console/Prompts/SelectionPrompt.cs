@@ -80,14 +80,14 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public bool FilterOnSearch { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether or not escape will throw operationCanceled exception.
-    /// </summary>
-    public bool AbortOnEscapePress { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether or not the output will be cleared after submit.
     /// </summary>
     public bool ClearOnSubmit { get; set; } = true;
+
+    /// <summary>
+    /// Custom hotkey support
+    /// </summary>
+    public Dictionary<string, Func<ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectionPrompt{T}"/> class.
@@ -130,9 +130,16 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
-        if (AbortOnEscapePress && key.Key == ConsoleKey.Escape)
+        if (CustomHotKeyRegistrations is not null)
         {
-            return ListPromptInputResult.Abort;
+            foreach (var (registrationKey, func) in CustomHotKeyRegistrations)
+            {
+                if (func(key))
+                {
+                    state.InvokedCustomHotkeyRegistrationKey = registrationKey;
+                    return ListPromptInputResult.CustomHotkeyPressed;
+                }
+            }
         }
 
         if (key.Key == ConsoleKey.Enter
@@ -198,7 +205,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         var list = new List<IRenderable>();
         var disabledStyle = DisabledStyle ?? Color.Grey;
         var highlightStyle = HighlightStyle ?? Color.Blue;
-        var searchHighlightStyle = SearchHighlightStyle ?? new Style(foreground: Color.Default, background: Color.Yellow, Decoration.Bold);
+        var searchHighlightStyle = SearchHighlightStyle ?? Style.Plain;
 
         if (Title != null)
         {
@@ -221,7 +228,9 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
                 searchText.Length > 0 ? searchPrefix + searchText.EscapeMarkup() : searchPrefix));
         }
 
-        foreach (var item in items)
+        var materializedItems = items.ToList();
+
+        foreach (var item in materializedItems)
         {
             var current = item.Index == cursorIndex;
             var prompt = item.Index == cursorIndex ? ListPromptConstants.Arrow : new string(' ', ListPromptConstants.Arrow.Length);
@@ -243,6 +252,11 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
             }
 
             grid.AddRow(new Markup(indent + prompt + " " + text, style));
+        }
+
+        if (SearchEnabled && materializedItems.Count == 0)
+        {
+            grid.AddRow(new Markup(ListPromptConstants.FilterNotFound));
         }
 
         list.Add(grid);

@@ -39,26 +39,9 @@ public static class MultiSelectionPromptExtensions
             throw new ArgumentNullException(nameof(obj));
         }
 
+        obj.SearchEnabled = true;
+        obj.FilterOnSearch = true;
         obj.SearchFilter = searchFilter;
-        return obj;
-    }
-
-    /// <summary>
-    /// Sets whether <see cref="ConsoleKey.Escape"/> will throw <see cref="OperationCanceledException"/>.
-    /// </summary>
-    /// <typeparam name="T">The prompt result type.</typeparam>
-    /// <param name="obj">The prompt.</param>
-    /// <param name="shouldAbortOnEscapePress">Whether <see cref="ConsoleKey.Escape"/> should abort.</param>
-    /// <returns>The same instance so that multiple calls can be chained.</returns>
-    public static MultiSelectionPrompt<T> AbortOnEscapePress<T>(this MultiSelectionPrompt<T> obj, bool shouldAbortOnEscapePress = true)
-        where T : notnull
-    {
-        if (obj is null)
-        {
-            throw new ArgumentNullException(nameof(obj));
-        }
-
-        obj.AbortOnEscapePress = shouldAbortOnEscapePress;
         return obj;
     }
 
@@ -341,6 +324,27 @@ public static class MultiSelectionPromptExtensions
         }
 
         obj.SearchPlaceholderText = text;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets the text that will be displayed when no search text has been entered.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="key">The key to identify</param>
+    /// <param name="customHotkeyRegistration">A predicate for invoking</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static MultiSelectionPrompt<T> AddCustomHotkeyRegistration<T>(this MultiSelectionPrompt<T> obj, string key, Func<ConsoleKeyInfo, bool> customHotkeyRegistration)
+        where T : notnull
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        obj.CustomHotKeyRegistrations ??= [];
+        obj.CustomHotKeyRegistrations.Add(key, customHotkeyRegistration);
         return obj;
     }
 
