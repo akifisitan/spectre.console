@@ -204,6 +204,16 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             return ListPromptInputResult.Submit;
         }
 
+        if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.A)
+        {
+            foreach (var item in state.VisibleItems)
+            {
+                item.IsSelected = !item.IsSelected;
+            }
+
+            return ListPromptInputResult.Refresh;
+        }
+
         if ((!SearchEnabled && key.Key == ConsoleKey.Spacebar) || (SearchEnabled && key.Key == ConsoleKey.Spacebar && key.Modifiers == ConsoleModifiers.Control) || key.Key == ConsoleKey.Packet)
         {
             var current = state.Current;
@@ -332,7 +342,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         if (scrollable)
         {
             // There are more choices
-            list.Add(new Markup(MoreChoicesText ?? ListPromptConstants.MoreChoicesMarkup));
+            list.Add(new Markup(MoreChoicesText ?? ListPromptConstants.MoreChoicesMarkup, new Style(foreground: Color.Gray)));
         }
 
         // Instructions
@@ -342,7 +352,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         }
         else
         {
-            list.Add(new Markup(InstructionsText ?? (SearchEnabled ? ListPromptConstants.InstructionsWithSearchMarkup : ListPromptConstants.InstructionsMarkup)));
+            list.Add(new Markup(InstructionsText ?? (SearchEnabled ? ListPromptConstants.InstructionsWithSearchMarkup : ListPromptConstants.InstructionsMarkup), new Style(foreground: Color.Gray)));
         }
 
         // Combine all items
