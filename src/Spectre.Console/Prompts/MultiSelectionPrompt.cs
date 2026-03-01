@@ -204,7 +204,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             return ListPromptInputResult.Submit;
         }
 
-        if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.A)
+        if (key.Modifiers == ConsoleModifiers.Alt && key.Key == ConsoleKey.A)
         {
             foreach (var item in state.VisibleItems)
             {

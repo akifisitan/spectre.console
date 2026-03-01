@@ -50,7 +50,7 @@ internal sealed class ListPromptState<T>
     {
         if (SearchEnabled)
         {
-            if (!char.IsControl(keyInfo.KeyChar))
+            if (!char.IsControl(keyInfo.KeyChar) && keyInfo.Modifiers != ConsoleModifiers.Alt)
             {
                 SearchText += keyInfo.KeyChar;
                 if (FilterOnSearch)
