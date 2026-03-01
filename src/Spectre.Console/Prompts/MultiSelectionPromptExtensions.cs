@@ -344,7 +344,7 @@ public static class MultiSelectionPromptExtensions
         }
 
         obj.CustomHotKeyRegistrations ??= [];
-        obj.CustomHotKeyRegistrations.Add(key, customHotkeyRegistration);
+        obj.CustomHotKeyRegistrations.TryAdd(key, customHotkeyRegistration);
         return obj;
     }
 

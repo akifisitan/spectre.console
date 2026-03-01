@@ -52,11 +52,6 @@ internal sealed class ListPromptState<T>
         {
             if (!char.IsControl(keyInfo.KeyChar))
             {
-                if (keyInfo.Key == ConsoleKey.Spacebar && keyInfo.Modifiers == ConsoleModifiers.Control)
-                {
-                    return false;
-                }
-
                 SearchText += keyInfo.KeyChar;
                 if (FilterOnSearch)
                 {

@@ -214,7 +214,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             return ListPromptInputResult.Refresh;
         }
 
-        if ((!SearchEnabled && key.Key == ConsoleKey.Spacebar) || (SearchEnabled && key.Key == ConsoleKey.Spacebar && key.Modifiers == ConsoleModifiers.Control) || key.Key == ConsoleKey.Packet)
+        if (key.Key == ConsoleKey.Tab || key.Key == ConsoleKey.Packet)
         {
             var current = state.Current;
             if (current == null)
@@ -352,7 +352,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         }
         else
         {
-            list.Add(new Markup(InstructionsText ?? (SearchEnabled ? ListPromptConstants.InstructionsWithSearchMarkup : ListPromptConstants.InstructionsMarkup), new Style(foreground: Color.Gray)));
+            list.Add(new Markup(InstructionsText ?? ListPromptConstants.InstructionsMarkup, new Style(foreground: Color.Gray)));
         }
 
         // Combine all items

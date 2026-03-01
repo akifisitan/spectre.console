@@ -296,7 +296,7 @@ public static class SelectionPromptExtensions
         }
 
         obj.CustomHotKeyRegistrations ??= [];
-        obj.CustomHotKeyRegistrations.Add(key, customHotkeyRegistration);
+        obj.CustomHotKeyRegistrations.TryAdd(key, customHotkeyRegistration);
         return obj;
     }
 
