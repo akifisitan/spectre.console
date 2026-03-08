@@ -1,12 +1,15 @@
 namespace Spectre.Console;
 
 /// <summary>
-/// Indicates that the tree being rendered includes a cycle, and cannot be rendered.
+/// The exception thrown when a registered custom hotkey interrupts a prompt.
 /// </summary>
+/// <remarks>
+/// Use <see cref="Key"/> to identify the hotkey registration that was invoked.
+/// </remarks>
 public sealed class CustomHotkeyInvocationException : Exception
 {
     /// <summary>
-    /// The registration key.
+    /// Gets the registration key of the custom hotkey that interrupted the prompt.
     /// </summary>
     public string Key { get; }
 
