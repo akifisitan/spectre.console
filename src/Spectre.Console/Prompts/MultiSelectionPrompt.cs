@@ -363,7 +363,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         if (scrollable)
         {
             // There are more choices
-            list.Add(new Markup(MoreChoicesText ?? ListPromptConstants.MoreChoicesMarkup, new Style(foreground: Color.Gray)));
+            list.Add(new Markup(MoreChoicesText ?? ListPromptConstants.MoreChoicesMarkup));
         }
 
         // Instructions
@@ -373,7 +373,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         }
         else
         {
-            list.Add(new Markup(InstructionsText ?? ListPromptConstants.InstructionsMarkup, new Style(foreground: Color.Gray)));
+            list.Add(new Markup(InstructionsText ?? ListPromptConstants.InstructionsMarkup));
         }
 
         // Combine all items
