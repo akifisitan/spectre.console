@@ -450,6 +450,10 @@
         public static void MoveUp(this Spectre.Console.IAnsiConsoleCursor cursor, int steps) { }
         public static void Show(this Spectre.Console.IAnsiConsoleCursor cursor) { }
     }
+    public sealed class CustomHotkeyInvocationException : System.Exception
+    {
+        public string Key { get; }
+    }
     public sealed class DownloadedColumn : Spectre.Console.ProgressColumn
     {
         public DownloadedColumn() { }
@@ -2408,7 +2412,15 @@
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> AddChoices<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, T choice, System.Action<Spectre.Console.IMultiSelectionItem<T>> configurator)
             where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> AddCustomHotkeyRegistration<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, string key, System.Func<System.ConsoleKeyInfo, bool> customHotkeyRegistration)
+            where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> ClearOnSubmit<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, bool shouldClear = true)
+            where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> DefaultValue<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, T? defaultValue)
+            where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> DisableSearch<T>(this Spectre.Console.MultiSelectionPrompt<T> obj)
+            where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> EnableSearch<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, bool filterOnSearch = false)
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> HighlightStyle<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, Spectre.Console.Style highlightStyle)
             where T :  notnull { }
@@ -2426,11 +2438,15 @@
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> Required<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, bool required)
             where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> SearchPlaceholderText<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, string? text)
+            where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> Select<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, T item)
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> Title<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, string? title)
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> UseConverter<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, System.Func<T, string>? displaySelector)
+            where T :  notnull { }
+        public static Spectre.Console.MultiSelectionPrompt<T> UseSearchFilter<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, System.Func<T, string, bool> searchFilter)
             where T :  notnull { }
         public static Spectre.Console.MultiSelectionPrompt<T> WrapAround<T>(this Spectre.Console.MultiSelectionPrompt<T> obj, bool shouldWrap = true)
             where T :  notnull { }
@@ -2440,14 +2456,20 @@
     {
         public MultiSelectionPrompt(System.Collections.Generic.IEqualityComparer<T>? comparer = null) { }
         public System.Func<System.Collections.Generic.List<T>>? CancelResult { get; set; }
+        public bool ClearOnSubmit { get; set; }
         public System.Func<T, string>? Converter { get; set; }
+        public System.Collections.Generic.Dictionary<string, System.Func<System.ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
         public T DefaultValue { get; set; }
+        public bool FilterOnSearch { get; set; }
         public Spectre.Console.Style? HighlightStyle { get; set; }
         public string? InstructionsText { get; set; }
         public Spectre.Console.SelectionMode Mode { get; set; }
         public string? MoreChoicesText { get; set; }
         public int PageSize { get; set; }
         public bool Required { get; set; }
+        public bool SearchEnabled { get; set; }
+        public System.Func<T, string, bool>? SearchFilter { get; set; }
+        public string? SearchPlaceholderText { get; set; }
         public string? Title { get; set; }
         public bool WrapAround { get; set; }
         public Spectre.Console.IMultiSelectionItem<T> AddChoice(T item) { }
@@ -2789,11 +2811,15 @@
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> AddChoices<T>(this Spectre.Console.SelectionPrompt<T> obj, params T[] choices)
             where T :  notnull { }
+        public static Spectre.Console.SelectionPrompt<T> AddCustomHotkeyRegistration<T>(this Spectre.Console.SelectionPrompt<T> obj, string key, System.Func<System.ConsoleKeyInfo, bool> customHotkeyRegistration)
+            where T :  notnull { }
+        public static Spectre.Console.SelectionPrompt<T> ClearOnSubmit<T>(this Spectre.Console.SelectionPrompt<T> obj, bool shouldClear = true)
+            where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> DefaultValue<T>(this Spectre.Console.SelectionPrompt<T> obj, T? defaultValue)
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> DisableSearch<T>(this Spectre.Console.SelectionPrompt<T> obj)
             where T :  notnull { }
-        public static Spectre.Console.SelectionPrompt<T> EnableSearch<T>(this Spectre.Console.SelectionPrompt<T> obj)
+        public static Spectre.Console.SelectionPrompt<T> EnableSearch<T>(this Spectre.Console.SelectionPrompt<T> obj, bool filterOnSearch = false)
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> HighlightStyle<T>(this Spectre.Console.SelectionPrompt<T> obj, Spectre.Console.Style highlightStyle)
             where T :  notnull { }
@@ -2803,11 +2829,15 @@
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> PageSize<T>(this Spectre.Console.SelectionPrompt<T> obj, int pageSize)
             where T :  notnull { }
+        public static Spectre.Console.SelectionPrompt<T> SearchHighlightStyle<T>(this Spectre.Console.SelectionPrompt<T> obj, Spectre.Console.Style searchHighlightStyle)
+            where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> SearchPlaceholderText<T>(this Spectre.Console.SelectionPrompt<T> obj, string? text)
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> Title<T>(this Spectre.Console.SelectionPrompt<T> obj, string? title)
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> UseConverter<T>(this Spectre.Console.SelectionPrompt<T> obj, System.Func<T, string>? displaySelector)
+            where T :  notnull { }
+        public static Spectre.Console.SelectionPrompt<T> UseSearchFilter<T>(this Spectre.Console.SelectionPrompt<T> obj, System.Func<T, string, bool> searchFilter)
             where T :  notnull { }
         public static Spectre.Console.SelectionPrompt<T> WrapAround<T>(this Spectre.Console.SelectionPrompt<T> obj, bool shouldWrap = true)
             where T :  notnull { }
@@ -2817,14 +2847,18 @@
     {
         public SelectionPrompt(System.Collections.Generic.IEqualityComparer<T>? comparer = null) { }
         public System.Func<T>? CancelResult { get; set; }
+        public bool ClearOnSubmit { get; set; }
         public System.Func<T, string>? Converter { get; set; }
+        public System.Collections.Generic.Dictionary<string, System.Func<System.ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
         public T DefaultValue { get; set; }
         public Spectre.Console.Style? DisabledStyle { get; set; }
+        public bool FilterOnSearch { get; set; }
         public Spectre.Console.Style? HighlightStyle { get; set; }
         public Spectre.Console.SelectionMode Mode { get; set; }
         public string? MoreChoicesText { get; set; }
         public int PageSize { get; set; }
         public bool SearchEnabled { get; set; }
+        public System.Func<T, string, bool>? SearchFilter { get; set; }
         public Spectre.Console.Style? SearchHighlightStyle { get; set; }
         public string? SearchPlaceholderText { get; set; }
         public string? Title { get; set; }
@@ -3184,6 +3218,8 @@
     {
         public static Spectre.Console.TextPrompt<T> AddChoice<T>(this Spectre.Console.TextPrompt<T> obj, T choice) { }
         public static Spectre.Console.TextPrompt<T> AddChoices<T>(this Spectre.Console.TextPrompt<T> obj, System.Collections.Generic.IEnumerable<T> choices) { }
+        public static Spectre.Console.TextPrompt<T> AddCustomHotkeyRegistration<T>(this Spectre.Console.TextPrompt<T> obj, string key, System.Func<System.ConsoleKeyInfo, bool> customHotkeyRegistration)
+            where T :  notnull { }
         public static Spectre.Console.TextPrompt<T> AllowEmpty<T>(this Spectre.Console.TextPrompt<T> obj) { }
         public static Spectre.Console.TextPrompt<T> ChoicesStyle<T>(this Spectre.Console.TextPrompt<T> obj, Spectre.Console.Style? style) { }
         public static Spectre.Console.TextPrompt<T> ClearOnFinish<T>(this Spectre.Console.TextPrompt<T> obj, bool clear = true) { }
@@ -3214,6 +3250,7 @@
         public bool ClearOnFinish { get; set; }
         public System.Func<T, string>? Converter { get; set; }
         public System.Globalization.CultureInfo? Culture { get; set; }
+        public System.Collections.Generic.Dictionary<string, System.Func<System.ConsoleKeyInfo, bool>>? CustomHotKeyRegistrations { get; set; }
         public Spectre.Console.Style? DefaultValueStyle { get; set; }
         public bool EditableDefaultValue { get; set; }
         public string InvalidChoiceMessage { get; set; }
