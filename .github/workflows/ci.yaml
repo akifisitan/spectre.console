@@ -1,6 +1,11 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Pull Request
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -21,8 +26,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET SDK (global.json)
+      - name: Setup .NET SDKs (net8.0, global.json)
         uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          dotnet-version: 8.0.x
 
       - name: Build
         shell: bash

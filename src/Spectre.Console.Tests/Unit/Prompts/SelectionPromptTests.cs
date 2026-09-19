@@ -281,7 +281,7 @@ public sealed class SelectionPromptTests
     }
 
     [Fact]
-    public void Should_Highlight_Search_Term()
+    public void Should_Use_Plain_Search_Highlighting_By_Default()
     {
         // Given
         var console = new TestConsole();
@@ -298,7 +298,8 @@ public sealed class SelectionPromptTests
         prompt.Show(console);
 
         // Then
-        console.Output.ShouldContain($"{ESC}[38;5;12m> Item {ESC}[0m{ESC}[1;38;5;12;48;5;11m1{ESC}[0m");
+        console.Output.ShouldContain($"{ESC}[38;5;12m> Item 1{ESC}[0m");
+        console.Output.ShouldNotContain("48;5;11");
     }
 
     [Fact]
@@ -364,11 +365,11 @@ public sealed class SelectionPromptTests
             .EnableSearch()
             .AddChoices("Item1")
             .AddChoices("Item 2");
-        string result = prompt.Show(console);
+        var result = prompt.Show(console);
 
         // Then
         result.ShouldBe("Item 2");
-        console.Output.ShouldContain($"{ESC}[38;5;12m> {ESC}[0m{ESC}[1;38;5;12;48;5;11mItem {ESC}[0m{ESC}[38;5;12m2{ESC}[0m ");
+        console.Output.ShouldContain($"{ESC}[38;5;12m> Item 2{ESC}[0m");
     }
 
     [Fact]

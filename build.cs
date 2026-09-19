@@ -57,7 +57,7 @@ Task("Test")
 });
 
 Task("Package")
-    .IsDependentOn("Build")
+    .IsDependentOn("Test")
     .Does(ctx =>
 {
     ctx.DotNetPack(solution, new DotNetPackSettings

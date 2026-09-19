@@ -135,31 +135,11 @@ internal sealed class ListPromptState<T>
                 return true;
 
             case ConsoleKey.PageUp:
-                var pageUpIndex = Index - PageSize;
-                if (WrapAround)
-                {
-                    pageUpIndex = (pageUpIndex + VisibleItems.Count) % VisibleItems.Count;
-                }
-                else
-                {
-                    pageUpIndex = Math.Max(pageUpIndex, 0);
-                }
-
-                _selectableIndex = _selectableItems.IndexOf(_selectableItems.First(x => x.Index >= pageUpIndex));
+                MovePage(-PageSize);
                 return true;
 
             case ConsoleKey.PageDown:
-                var pageDownIndex = Index + PageSize;
-                if (WrapAround)
-                {
-                    pageDownIndex %= VisibleItems.Count;
-                }
-                else
-                {
-                    pageDownIndex = Math.Min(pageDownIndex, VisibleItems.Count - 1);
-                }
-
-                _selectableIndex = _selectableItems.IndexOf(_selectableItems.First(x => x.Index >= pageDownIndex));
+                MovePage(PageSize);
                 return true;
         }
 
@@ -169,6 +149,35 @@ internal sealed class ListPromptState<T>
     internal void Cancel()
     {
         IsCancelled = true;
+    }
+
+    private void MovePage(int offset)
+    {
+        if (_selectableItems.Count == 0)
+        {
+            return;
+        }
+
+        var targetIndex = (long)Index + offset;
+        if (WrapAround)
+        {
+            targetIndex = ((targetIndex % VisibleItems.Count) + VisibleItems.Count) % VisibleItems.Count;
+        }
+        else
+        {
+            targetIndex = Math.Max(0, Math.Min(targetIndex, VisibleItems.Count - 1));
+        }
+
+        var selectableIndex = _selectableItems.FindIndex(item => item.Index >= targetIndex);
+        if (selectableIndex >= 0)
+        {
+            _selectableIndex = selectableIndex;
+        }
+        else
+        {
+            // The target lies after the last selectable item, among filtered groups.
+            _selectableIndex = WrapAround && offset > 0 ? 0 : _selectableItems.Count - 1;
+        }
     }
 
     private bool DefaultSearchFilter(T data, string search)
@@ -191,9 +200,18 @@ internal sealed class ListPromptState<T>
 
     private List<ListPromptItem<T>> FilterItemsBySearch()
     {
-        return Items
-            .Where(x => MatchesSearch(x) || x.Children.Any(MatchesSearch))
-            .ToList();
+        var matches = new HashSet<ListPromptItem<T>>();
+        foreach (var item in Items.Where(MatchesSearch))
+        {
+            // Keep the complete path to a match without including unrelated children.
+            var current = item;
+            while (current != null && matches.Add(current))
+            {
+                current = current.Parent;
+            }
+        }
+
+        return Items.Where(matches.Contains).ToList();
     }
 
     private bool MatchesSearch(ListPromptItem<T> item) => _searchFilter(item.Data, SearchText);

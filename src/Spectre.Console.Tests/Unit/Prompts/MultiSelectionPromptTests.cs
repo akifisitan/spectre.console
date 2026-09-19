@@ -134,7 +134,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
 
         var prompt = new MultiSelectionPrompt<string>();
 
@@ -153,9 +153,9 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.DownArrow);
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -173,9 +173,9 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.DownArrow);
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Escape);
 
         // When
@@ -194,9 +194,9 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.DownArrow);
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Escape);
 
         // When
@@ -215,9 +215,9 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.DownArrow);
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Escape);
 
         // When
@@ -236,9 +236,9 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.DownArrow);
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Escape);
 
         // When
@@ -257,7 +257,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -268,15 +268,15 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "> [ ] First                                 ",
-            "  [ ] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)> [X] First                                 ",
-            "  [ ] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)",
+            "> [ ] First                                                          ",
+            "  [ ] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)> [X] First                                                          ",
+            "  [ ] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 
@@ -286,7 +286,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -299,19 +299,19 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "  [ ] First                                 ",
-            "> [ ] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ",
-            "                                            ",
-            "  [ ] First                                 ",
-            "> [X] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)",]);
+            "Select one                                                           ",
+            "                                                                     ",
+            "  [ ] First                                                          ",
+            "> [ ] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "  [ ] First                                                          ",
+            "> [X] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",]);
     }
 
     [Fact]
@@ -320,7 +320,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -333,19 +333,19 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "> [ ] First                                 ",
-            "  [ ] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ",
-            "                                            ",
-            "> [X] First                                 ",
-            "  [ ] Second                                ",
-            "  [ ] Third                                 ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)",
+            "Select one                                                           ",
+            "                                                                     ",
+            "> [ ] First                                                          ",
+            "  [ ] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "> [X] First                                                          ",
+            "  [ ] Second                                                         ",
+            "  [ ] Third                                                          ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 
@@ -355,7 +355,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -369,15 +369,21 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "  [ ] Second                                ",
-            "> [ ] Third                                 ",
-            "  [ ] Fourth                                ",
-            "                                            ",
-            "(Move up and down to reveal more choices)   ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ", "                                            ", "  [ ] Second                                ", "> [X] Third                                 ", "  [ ] Fourth                                ", "                                            ", "(Move up and down to reveal more choices)   ",
-            "(Press <space> to select, <enter> to accept)",
+            "Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Second                                                         ",
+            "> [ ] Third                                                          ",
+            "  [ ] Fourth                                                         ",
+            "                                                                     ",
+            "(Move up and down to reveal more choices)                            ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Second                                                         ",
+            "> [X] Third                                                          ",
+            "  [ ] Fourth                                                         ",
+            "                                                                     ",
+            "(Move up and down to reveal more choices)                            ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 
@@ -387,7 +393,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -401,21 +407,21 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "  [ ] Fourth                                ",
-            "  [ ] Fifth                                 ",
-            "> [ ] Sixth                                 ",
-            "                                            ",
-            "(Move up and down to reveal more choices)   ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ",
-            "                                            ",
-            "  [ ] Fourth                                ",
-            "  [ ] Fifth                                 ",
-            "> [X] Sixth                                 ",
-            "                                            ",
-            "(Move up and down to reveal more choices)   ",
-            "(Press <space> to select, <enter> to accept)",
+            "Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Fourth                                                         ",
+            "  [ ] Fifth                                                          ",
+            "> [ ] Sixth                                                          ",
+            "                                                                     ",
+            "(Move up and down to reveal more choices)                            ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Fourth                                                         ",
+            "  [ ] Fifth                                                          ",
+            "> [X] Sixth                                                          ",
+            "                                                                     ",
+            "(Move up and down to reveal more choices)                            ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 
@@ -425,7 +431,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -440,25 +446,25 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "  [ ] Group one                             ",
-            "    [ ] First                               ",
-            "    [ ] Second                              ",
-            "  [ ] Group two                             ",
-            "  > [ ] Third                               ",
-            "    [ ] Fourth                              ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ",
-            "                                            ",
-            "  [ ] Group one                             ",
-            "    [ ] First                               ",
-            "    [ ] Second                              ",
-            "  [ ] Group two                             ",
-            "  > [X] Third                               ",
-            "    [ ] Fourth                              ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)",
+            "Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Group one                                                      ",
+            "    [ ] First                                                        ",
+            "    [ ] Second                                                       ",
+            "  [ ] Group two                                                      ",
+            "  > [ ] Third                                                        ",
+            "    [ ] Fourth                                                       ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Group one                                                      ",
+            "    [ ] First                                                        ",
+            "    [ ] Second                                                       ",
+            "  [ ] Group two                                                      ",
+            "  > [X] Third                                                        ",
+            "    [ ] Fourth                                                       ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 
@@ -468,7 +474,7 @@ public sealed class MultiSelectionPromptTests
         // Given
         var console = new TestConsole();
         console.Profile.Capabilities.Interactive = true;
-        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Tab);
         console.Input.PushKey(ConsoleKey.Enter);
 
         // When
@@ -483,25 +489,25 @@ public sealed class MultiSelectionPromptTests
 
         // Then
         console.Lines.ShouldBe([
-            "Select one                                  ",
-            "                                            ",
-            "  [ ] Group one                             ",
-            "    [ ] First                               ",
-            "    [ ] Second                              ",
-            "> [ ] Group two                             ",
-            "    [ ] Third                               ",
-            "    [ ] Fourth                              ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)Select one                                  ",
-            "                                            ",
-            "  [ ] Group one                             ",
-            "    [ ] First                               ",
-            "    [ ] Second                              ",
-            "> [X] Group two                             ",
-            "    [X] Third                               ",
-            "    [X] Fourth                              ",
-            "                                            ",
-            "(Press <space> to select, <enter> to accept)",
+            "Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Group one                                                      ",
+            "    [ ] First                                                        ",
+            "    [ ] Second                                                       ",
+            "> [ ] Group two                                                      ",
+            "    [ ] Third                                                        ",
+            "    [ ] Fourth                                                       ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)Select one                                                           ",
+            "                                                                     ",
+            "  [ ] Group one                                                      ",
+            "    [ ] First                                                        ",
+            "    [ ] Second                                                       ",
+            "> [X] Group two                                                      ",
+            "    [X] Third                                                        ",
+            "    [X] Fourth                                                       ",
+            "                                                                     ",
+            "(Press <tab> to select, <alt> + <a> to toggle all, <enter> to accept)",
         ]);
     }
 }

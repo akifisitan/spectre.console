@@ -22,19 +22,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Setup .NET SDK (net8.0, net9.0)
-        uses: actions/setup-dotnet@v5
+      - name: Setup .NET SDKs (net8.0, global.json)
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
-
-      - name: Setup .NET SDK (global.json)
-        uses: actions/setup-dotnet@v5
+          global-json-file: global.json
+          dotnet-version: 8.0.x
 
       - name: Publish
         shell: bash
